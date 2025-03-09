@@ -1,14 +1,56 @@
 # MCP Python SDK
 
-to run the client
-    pip install requests python-dotenv rich openai
-    add .env 
-    OPENAI_API_KEY=
 
-to run the server
+# Usage
+## to run the client
+    pip install requests python-dotenv rich openai
+    
+    add 
+        .env 
+    add
+        OPENAI_API_KEY=
+
+## to run the server
     pip install fastapi uvicorn neo4j python-dotenv
     uvicorn ne04j_mcp_server:app --host 0.0.0.0 --port 8000
 
+# Data Prep
+
+## Insert Node:
+    CREATE (p1:Person {name: "Tom Hanks", birthYear: 1956})
+    CREATE (p2:Person {name: "Kevin Bacon", birthYear: 1958})
+    CREATE (m1:Movie {title: "Forrest Gump", releaseYear: 1994})
+    CREATE (m2:Movie {title: "Apollo 13", releaseYear: 1995})
+
+## Insert Relationship
+    MATCH (p:Person {name: "Tom Hanks"}), (m:Movie {title: "Forrest Gump"})
+    CREATE (p)-[:ACTED_IN]->(m)
+
+    MATCH (p:Person {name: "Tom Hanks"}), (m:Movie {title: "Apollo 13"})
+    CREATE (p)-[:ACTED_IN]->(m)
+
+    MATCH (p1:Person {name: "Tom Hanks"}), (p2:Person {name: "Kevin Bacon"})
+    CREATE (p1)-[:FRIENDS_WITH]->(p2)
+
+## Insert properties
+    MATCH (p:Person {name: "Tom Hanks"})
+    SET p.oscarsWon = 2
+
+    MATCH (m:Movie {title: "Forrest Gump"})
+    SET m.genre = "Drama"
+
+    MATCH (p:Person {name: "Tom Hanks"})-[r:ACTED_IN]->(m:Movie {title: "Forrest Gump"})
+    SET r.role = "Forrest Gump"
+
+## Insert Complex Structure
+    // Create a community and then match persons to add them to the community
+    CREATE (c1:Community {name: "Hollywood Stars"})
+    WITH c1
+    MATCH (p:Person)
+    WHERE p.name IN ["Tom Hanks", "Kevin Bacon"]
+    CREATE (p)-[:MEMBER_OF]->(c1)
+   
+# other things - boiler plate - no clue - ignore for now.
 
 <div align="center">
 
