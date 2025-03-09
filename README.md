@@ -1,5 +1,15 @@
 # MCP Python SDK
 
+to run the client
+    pip install requests python-dotenv rich openai
+    add .env 
+    OPENAI_API_KEY=
+
+to run the server
+    pip install fastapi uvicorn neo4j python-dotenv
+    uvicorn ne04j_mcp_server:app --host 0.0.0.0 --port 8000
+
+
 <div align="center">
 
 <strong>Python implementation of the Model Context Protocol (MCP)</strong>
