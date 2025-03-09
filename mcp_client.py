@@ -375,7 +375,7 @@ def main():
     
     args = parser.parse_args()
     
-    client = MCPClient(server_url=args.server)
+    client = MCPClientWithLLM(server_url=args.server)
     
     if args.command == "schema":
         client.display_schema()
