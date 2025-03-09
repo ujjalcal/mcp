@@ -34,73 +34,6 @@ load_dotenv()
 # OpenAI configuration
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-class MCPClientWithLLM(MCPClient):
-    """Extended MCP Client with OpenAI LLM integration"""
-    
-    def __init__(self, server_url=MCP_SERVER_URL, model="gpt-4"):
-        super().__init__(server_url)
-        self.openai_client = OpenAI(api_key=OPENAI_API_KEY)
-        self.model = model
-    
-    def generate_query_with_llm(self, user_input, schema=None):
-        """Use OpenAI to generate a Cypher query based on user input and schema"""
-        if not schema:
-            schema = self.get_schema()
-            
-        # Create a system message with the database schema
-        system_message = f"""
-        You are a Neo4j database expert. Given the following database schema:
-        
-        Nodes: {', '.join([node['label'] for node in schema['nodes']])}
-        Relationships: {', '.join([rel['type'] for rel in schema['relationships']])}
-        
-        Generate a Cypher query that answers the user's question. Return ONLY the Cypher query without any explanations.
-        """
-        
-        # Call the OpenAI API
-        response = self.openai_client.chat.completions.create(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": user_input}
-            ],
-            temperature=0.1  # Low temperature for more deterministic outputs
-        )
-        
-        # Extract the generated Cypher query
-        cypher_query = response.choices[0].message.content.strip()
-        
-        # Remove markdown code blocks if present
-        if cypher_query.startswith("``````"):
-            cypher_query = cypher_query.strip("```")
-            if cypher_query.startswith("cypher"):
-                cypher_query = cypher_query[6:].strip()
-        
-        return cypher_query
-    
-    def analyze_results_with_llm(self, user_query, results):
-        """Use OpenAI to analyze and explain query results"""
-        if not results:
-            return "No results found."
-            
-        # Create a prompt for analyzing the results
-        prompt = f"""
-        The user asked: "{user_query}"
-        
-        The database returned these results:
-        {results}
-        
-        Please analyze these results and provide a clear, concise explanation.
-        """
-        
-        # Call the OpenAI API
-        response = self.openai_client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7
-        )
-        
-        return response.choices.message.content
 
 
 class MCPClient:
@@ -349,6 +282,73 @@ class MCPClient:
             self.display_query_results(result)
 
 
+class MCPClientWithLLM(MCPClient):
+    """Extended MCP Client with OpenAI LLM integration"""
+    
+    def __init__(self, server_url=MCP_SERVER_URL, model="gpt-4"):
+        super().__init__(server_url)
+        self.openai_client = OpenAI(api_key=OPENAI_API_KEY)
+        self.model = model
+    
+    def generate_query_with_llm(self, user_input, schema=None):
+        """Use OpenAI to generate a Cypher query based on user input and schema"""
+        if not schema:
+            schema = self.get_schema()
+            
+        # Create a system message with the database schema
+        system_message = f"""
+        You are a Neo4j database expert. Given the following database schema:
+        
+        Nodes: {', '.join([node['label'] for node in schema['nodes']])}
+        Relationships: {', '.join([rel['type'] for rel in schema['relationships']])}
+        
+        Generate a Cypher query that answers the user's question. Return ONLY the Cypher query without any explanations.
+        """
+        
+        # Call the OpenAI API
+        response = self.openai_client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_input}
+            ],
+            temperature=0.1  # Low temperature for more deterministic outputs
+        )
+        
+        # Extract the generated Cypher query
+        cypher_query = response.choices[0].message.content.strip()
+        
+        # Remove markdown code blocks if present
+        if cypher_query.startswith("``````"):
+            cypher_query = cypher_query.strip("```")
+            if cypher_query.startswith("cypher"):
+                cypher_query = cypher_query[6:].strip()
+        
+        return cypher_query
+    
+    def analyze_results_with_llm(self, user_query, results):
+        """Use OpenAI to analyze and explain query results"""
+        if not results:
+            return "No results found."
+            
+        # Create a prompt for analyzing the results
+        prompt = f"""
+        The user asked: "{user_query}"
+        
+        The database returned these results:
+        {results}
+        
+        Please analyze these results and provide a clear, concise explanation.
+        """
+        
+        # Call the OpenAI API
+        response = self.openai_client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7
+        )
+        
+        return response.choices.message.content
 
 def main():
     """Main entry point for the CLI"""
