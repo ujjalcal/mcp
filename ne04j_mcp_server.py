@@ -7,13 +7,19 @@ from neo4j import GraphDatabase, Driver
 import json
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
 
-# Neo4j connection settings
-NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
+load_dotenv()  # Ensure this is called before accessing the variables
+
+NEO4J_URI = "neo4j+s://1e30f4c4.databases.neo4j.io" # os.getenv("NEO4J_URI")
+NEO4J_USER = "neo4j" # os.getenv("NEO4J_USER")
+NEO4J_PASSWORD = "pDMkrbwg1L__-3BHh46r-MD9-z6Frm8wnR__ZzFiVmM" # os.getenv("NEO4J_PASSWORD")
+
+print(f"NEO4J_URI: {NEO4J_URI}")
+print(f"NEO4J_USER: {NEO4J_USER}")
+print(f"NEO4J_PASSWORD: {NEO4J_PASSWORD}")
+
+
+# print(f"NEO4J_URI: {NEO4J_URI}, NEO4J_USER: {NEO4J_USER}, NEO4J_PASSWORD: {NEO4J_PASSWORD}")
 
 # Initialize FastAPI
 app = FastAPI(title="Neo4j MCP Server", 
