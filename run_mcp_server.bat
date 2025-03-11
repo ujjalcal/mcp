@@ -1,1 +1,0 @@
-npx -y @smithery/cli@latest run @smithery-ai/github --config-file "C:\Users\ujjal\work\mcp\github-config.json"

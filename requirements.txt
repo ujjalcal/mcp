@@ -1,0 +1,7 @@
+neo4j
+pydantic
+mcp
+requests
+openai
+rich
+python-dotenv

@@ -2,6 +2,9 @@ from mcp.server.fastmcp import FastMCP, Context
 from neo4j import GraphDatabase
 from pydantic import BaseModel
 from typing import List, Dict, Any
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 # Initialize FastMCP server
 mcp = FastMCP("Neo4j MCP Server")
@@ -13,6 +16,7 @@ NEO4J_PASSWORD = "pDMkrbwg1L__-3BHh46r-MD9-z6Frm8wnR__ZzFiVmM"
 
 # Neo4j driver connection
 def get_db():
+    logging.debug("Establishing Neo4j database connection")
     return GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
 
 # Models
@@ -34,6 +38,7 @@ class QueryRequest(BaseModel):
 
 # Function to fetch node labels
 def fetch_node_labels(session) -> List[NodeLabel]:
+    logging.debug("Fetching node labels")
     result = session.run("""
     CALL apoc.meta.nodeTypeProperties()
     YIELD nodeType, nodeLabels, propertyName
@@ -50,6 +55,7 @@ def fetch_node_labels(session) -> List[NodeLabel]:
 
 # Function to fetch relationship types
 def fetch_relationship_types(session) -> List[RelationshipType]:
+    logging.debug("Fetching relationship types")
     result = session.run("""
     CALL apoc.meta.relTypeProperties()
     YIELD relType, sourceNodeLabels, targetNodeLabels, propertyName
@@ -69,6 +75,7 @@ def fetch_relationship_types(session) -> List[RelationshipType]:
 # Define a resource to get the database schema
 @mcp.resource("schema://database")
 def get_schema() -> Dict[str, Any]:
+    logging.debug("get schemas...")
     driver = get_db()
     with driver.session() as session:
         nodes = fetch_node_labels(session)
@@ -78,6 +85,7 @@ def get_schema() -> Dict[str, Any]:
 # Define a tool to execute a query
 @mcp.tool()
 def execute_query(query: QueryRequest) -> Dict[str, Any]:
+    logging.debug("execute query...")
     driver = get_db()
     with driver.session() as session:
         result = session.run(query.cypher, query.parameters)
@@ -96,6 +104,7 @@ def execute_query(query: QueryRequest) -> Dict[str, Any]:
 # Define prompts for analysis
 @mcp.prompt()
 def relationship_analysis_prompt(node_type_1: str, node_type_2: str) -> str:
+    logging.debug("relationship analysis prompt...")
     return f"""
     Given the Neo4j database with {node_type_1} and {node_type_2} nodes, 
     I want to understand the relationships between them.
@@ -114,6 +123,7 @@ def relationship_analysis_prompt(node_type_1: str, node_type_2: str) -> str:
 
 @mcp.prompt()
 def path_discovery_prompt(start_node_label: str, start_node_property: str, start_node_value: str, end_node_label: str, end_node_property: str, end_node_value: str, max_depth: int) -> str:
+    logging.debug("path discovery prompt...")
     return f"""
     I'm looking to understand how {start_node_label} nodes with property {start_node_property}="{start_node_value}" 
     connect to {end_node_label} nodes with property {end_node_property}="{end_node_value}".
@@ -134,4 +144,6 @@ def path_discovery_prompt(start_node_label: str, start_node_property: str, start
 
 # Run the MCP server
 if __name__ == "__main__":
+    logging.debug("Starting MCP server")
     mcp.run()
+    # mcp.run(host="0.0.0.0")

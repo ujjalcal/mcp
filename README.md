@@ -1,17 +1,21 @@
 # MCP Python SDK
 
+    which python
+    python3 -m venv myenv
+    source myenv/Scripts/activate
+    pip install -r requirements.txt
+    python fast_mcp_server.py
+
 
 # Usage
 ## to run the client
-    pip install requests python-dotenv rich openai
     
-    add 
-        .env 
     add
+        .env
         OPENAI_API_KEY=
 
 ## to run the server
-    pip install fastapi uvicorn neo4j python-dotenv
+    
     uvicorn ne04j_mcp_server:app --host 0.0.0.0 --port 8000
 
 # Data Prep
